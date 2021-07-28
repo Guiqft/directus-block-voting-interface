@@ -1,15 +1,30 @@
 <template>
-    <interface-list-m2m
-        collection="ordem_do_dia"
-        field="proposicao_bloco"
-        :enableSelect="false"
-        :value="value"
-        @input="handleListInput"
-    />
+    <div class="block-voting">
+        <interface-list-m2m
+            collection="ordem_do_dia"
+            field="proposicao_bloco"
+            :enableSelect="false"
+            :value="value"
+            @input="handleListInput"
+            :template="`{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}}`"
+        />
+
+        <v-button class="selection-button" @click="drawerOpen = true">
+            Adicionar existente
+        </v-button>
+        test: {{ drawerOpen }}
+        <drawer-collection
+            collection="proposicoes"
+            :active="drawerOpen"
+            :multiple="true"
+            :selection="selection"
+            @input="testhandle"
+        />
+    </div>
 </template>
 
 <script lang="ts">
-import { PropType } from "vue"
+import { PropType, ref } from "vue"
 export default {
     emits: ["input"],
     props: {
@@ -23,8 +38,16 @@ export default {
     },
     setup(props, { emit }) {
         // const system = inject("system") as Record<string, any>
+
+        const drawerOpen = ref(false)
+        const selection = ref([])
+
         const handleListInput = (changes: string[]) => {
             emit("input", changes)
+        }
+
+        const testhandle = (values: any[]) => {
+            console.log(values)
         }
 
         // const values = inject("values") as Record<string, any>
@@ -32,9 +55,16 @@ export default {
         //     console.log("--changing", values)
         // })
 
-        return { handleListInput }
+        return { handleListInput, drawerOpen, selection, testhandle }
     },
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+.block-voting {
+    .selection-button {
+        position: absolute;
+        transform: translateY(-44px) translateX(147px);
+    }
+}
+</style>
