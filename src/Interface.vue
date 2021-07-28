@@ -1,32 +1,38 @@
 <template>
-    <v-input :model-value="value" @update:model-value="handleInput" />
+    <interface-list-m2m
+        collection="ordem_do_dia"
+        field="proposicao_bloco"
+        :enableSelect="false"
+        :value="value"
+        @input="handleListInput"
+    />
 </template>
 
 <script lang="ts">
-import { onMounted, inject, watch } from "vue"
+import { PropType } from "vue"
 export default {
     emits: ["input"],
     props: {
-        value: { type: String, required: true, default: null },
+        value: {
+            type: Array as PropType<
+                (number | string | Record<string, any>)[] | null
+            >,
+            required: true,
+            default: null,
+        },
     },
     setup(props, { emit }) {
-        const system = inject("system") as Record<string, any>
-        const values = inject("values") as Record<string, any>
-
-        const handleInput = (value: string) => {
-            emit("input", value)
+        // const system = inject("system") as Record<string, any>
+        const handleListInput = (changes: string[]) => {
+            emit("input", changes)
         }
 
-        watch(values, () => {
-            console.log("--changing", values)
-        })
+        // const values = inject("values") as Record<string, any>
+        // watch(values, () => {
+        //     console.log("--changing", values)
+        // })
 
-        onMounted(() => {
-            console.log(values)
-            console.log(system.useAppStore())
-        })
-
-        return { handleInput }
+        return { handleListInput }
     },
 }
 </script>

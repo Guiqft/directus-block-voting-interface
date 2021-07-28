@@ -1,35 +1,33 @@
-import { inject, watch, onMounted, resolveComponent, openBlock, createBlock } from 'vue';
+import { resolveComponent, openBlock, createBlock } from 'vue';
 
 var script = {
     emits: ["input"],
     props: {
-        value: { type: String, required: true, default: null },
+        value: {
+            type: Array,
+            required: true,
+            default: null,
+        },
     },
     setup: function (props, _a) {
         var emit = _a.emit;
-        var system = inject("system");
-        var values = inject("values");
-        var handleInput = function (value) {
-            emit("input", value);
+        var handleListInput = function (changes) {
+            emit("input", changes);
         };
-        watch(values, function () {
-            console.log("--changing", values);
-        });
-        onMounted(function () {
-            console.log(values);
-            console.log(system.useAppStore());
-        });
-        return { handleInput: handleInput };
+        return { handleListInput: handleListInput };
     },
 };
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_v_input = resolveComponent("v-input");
+  const _component_interface_list_m2m = resolveComponent("interface-list-m2m");
 
-  return (openBlock(), createBlock(_component_v_input, {
-    "model-value": $props.value,
-    "onUpdate:modelValue": $setup.handleInput
-  }, null, 8 /* PROPS */, ["model-value", "onUpdate:modelValue"]))
+  return (openBlock(), createBlock(_component_interface_list_m2m, {
+    collection: "ordem_do_dia",
+    field: "proposicao_bloco",
+    enableSelect: false,
+    value: $props.value,
+    onInput: $setup.handleListInput
+  }, null, 8 /* PROPS */, ["value", "onInput"]))
 }
 
 script.render = render;
