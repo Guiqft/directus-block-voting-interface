@@ -9,24 +9,23 @@
             :template="`{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}}`"
         />
 
-        <v-button class="selection-button" @click="drawerOpen = true">
+        <v-button class="selection-button" @click="dialogOpen = true">
             Adicionar existente
         </v-button>
-        test: {{ drawerOpen }}
-        <drawer-collection
-            collection="proposicoes"
-            :active="drawerOpen"
-            :multiple="true"
-            :selection="selection"
-            @input="testhandle"
-        />
+
+        <selection-dialog :open="dialogOpen" @close="dialogOpen = false" />
     </div>
 </template>
 
 <script lang="ts">
-import { PropType, ref } from "vue"
+import { PropType, ref, inject, watch, onMounted } from "vue"
+import { getItemByItemIDs } from "./utils"
+
+import SelectionDialog from "./SelectionDialog.vue"
+
 export default {
     emits: ["input"],
+    components: { SelectionDialog },
     props: {
         value: {
             type: Array as PropType<
@@ -37,25 +36,36 @@ export default {
         },
     },
     setup(props, { emit }) {
-        // const system = inject("system") as Record<string, any>
+        const system = inject("system") as Record<string, any>
+        const values = inject("values") as Record<string, any>
 
-        const drawerOpen = ref(false)
+        const dialogOpen = ref(false)
+        const singlePropositionsIDs = ref([])
         const selection = ref([])
+
+        watch(
+            values,
+            async (currentValues) => {
+                try {
+                    // getting propositions item by item
+                    if (currentValues.proposicao) {
+                        singlePropositionsIDs.value = await getItemByItemIDs(
+                            currentValues.proposicao,
+                            system
+                        )
+                    }
+                } catch (e) {
+                    console.error(e)
+                }
+            },
+            { immediate: true }
+        )
 
         const handleListInput = (changes: string[]) => {
             emit("input", changes)
         }
 
-        const testhandle = (values: any[]) => {
-            console.log(values)
-        }
-
-        // const values = inject("values") as Record<string, any>
-        // watch(values, () => {
-        //     console.log("--changing", values)
-        // })
-
-        return { handleListInput, drawerOpen, selection, testhandle }
+        return { handleListInput, dialogOpen }
     },
 }
 </script>
