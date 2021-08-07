@@ -1,4 +1,4 @@
-import { ref, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, Fragment, createVNode, toDisplayString, withScopeId, inject, watch, withCtx, createTextVNode } from 'vue';
+import { ref, onMounted, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, createVNode, withScopeId, createTextVNode, inject, watch, withCtx } from 'vue';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -53,6 +53,16 @@ function __generator(thisArg, body) {
     }
 }
 
+function __spreadArray(to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || from);
+}
+
 var checkForRelationIds = function (proposicoes) {
     return proposicoes.find(function (el) { return typeof el === "number"; });
 };
@@ -105,8 +115,26 @@ var getItemByItemIDs = function (propositions, system) { return __awaiter(void 0
         }
     });
 }); };
+var getFilters = function (propositions) {
+    var filter = {
+        status: {
+            _eq: "aguardando",
+        },
+    };
+    if (propositions.length > 0) {
+        filter.id = { _nin: propositions };
+    }
+    return filter;
+};
+var getSelectOptions = function (validPropositions) {
+    return validPropositions.map(function (el) { return ({
+        text: el.titulo + " - " + el.numero,
+        value: { proposicoes_id: el.id },
+    }); });
+};
 
 var script$1 = {
+    emits: ["input", "close"],
     props: {
         open: { type: Boolean, default: false, required: true },
         options: {
@@ -117,10 +145,20 @@ var script$1 = {
     setup: function (props, _a) {
         var emit = _a.emit;
         var selection = ref([]);
+        var handleSelection = function (selectedItems) {
+            selection.value = selectedItems;
+        };
+        var emitSelection = function () {
+            emit("input", selection.value);
+            emit("close");
+        };
         var emitClose = function () {
             emit("close");
         };
-        return { selection: selection, emitClose: emitClose };
+        onMounted(function () {
+            selection.value = [];
+        });
+        return { selection: selection, emitClose: emitClose, handleSelection: handleSelection, emitSelection: emitSelection };
     },
 };
 
@@ -128,32 +166,59 @@ const _withId = /*#__PURE__*/withScopeId("data-v-6013fdea");
 
 pushScopeId("data-v-6013fdea");
 const _hoisted_1$1 = /*#__PURE__*/createVNode("h2", null, "Selecione uma proposição para adicionar ao bloco:", -1 /* HOISTED */);
+const _hoisted_2$1 = { class: "action-buttons" };
+const _hoisted_3 = /*#__PURE__*/createTextVNode(" Cancelar ");
+const _hoisted_4 = /*#__PURE__*/createTextVNode(" Salvar ");
 popScopeId();
 
 const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_v_select = resolveComponent("v-select");
+  const _component_v_button = resolveComponent("v-button");
   const _component_v_sheet = resolveComponent("v-sheet");
   const _component_v_dialog = resolveComponent("v-dialog");
 
-  return (openBlock(), createBlock(Fragment, null, [
-    createVNode("p", null, "TESTE " + toDisplayString($props.open), 1 /* TEXT */),
-    createVNode(_component_v_dialog, {
-      "model-value": $props.open,
-      "onUpdate:modelValue": $setup.emitClose,
-      onEsc: $setup.emitClose
-    }, {
-      default: _withId(() => [
-        createVNode(_component_v_sheet, null, {
-          default: _withId(() => [
-            _hoisted_1$1,
-            createVNode(_component_v_select, { "model-value": $setup.selection }, null, 8 /* PROPS */, ["model-value"])
-          ]),
-          _: 1 /* STABLE */
-        })
-      ]),
-      _: 1 /* STABLE */
-    }, 8 /* PROPS */, ["model-value", "onUpdate:modelValue", "onEsc"])
-  ], 64 /* STABLE_FRAGMENT */))
+  return (openBlock(), createBlock(_component_v_dialog, {
+    "model-value": $props.open,
+    "onUpdate:modelValue": $setup.emitClose,
+    onEsc: $setup.emitClose
+  }, {
+    default: _withId(() => [
+      createVNode(_component_v_sheet, null, {
+        default: _withId(() => [
+          _hoisted_1$1,
+          createVNode(_component_v_select, {
+            "model-value": $setup.selection,
+            "onUpdate:modelValue": $setup.handleSelection,
+            items: $props.options,
+            multiple: ""
+          }, null, 8 /* PROPS */, ["model-value", "onUpdate:modelValue", "items"]),
+          createVNode("div", _hoisted_2$1, [
+            createVNode(_component_v_button, {
+              class: "cancel-button",
+              onClick: $setup.emitClose
+            }, {
+              default: _withId(() => [
+                _hoisted_3
+              ]),
+              _: 1 /* STABLE */
+            }, 8 /* PROPS */, ["onClick"]),
+            createVNode(_component_v_button, {
+              class: "save-button",
+              disabled: !($setup.selection.length > 0),
+              onClick: $setup.emitSelection
+            }, {
+              default: _withId(() => [
+                _hoisted_4
+              ]),
+              _: 1 /* STABLE */
+            }, 8 /* PROPS */, ["disabled", "onClick"])
+          ])
+        ]),
+        _: 1 /* STABLE */
+      })
+    ]),
+    _: 1 /* STABLE */
+  }, 8 /* PROPS */, ["model-value", "onUpdate:modelValue", "onEsc"]))
 });
 
 function styleInject(css, ref) {
@@ -183,7 +248,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z$1 = ".v-sheet[data-v-6013fdea] {\n  width: 500px;\n}\n.v-sheet h2[data-v-6013fdea] {\n  margin-bottom: 25px;\n}";
+var css_248z$1 = ".v-sheet[data-v-6013fdea] {\n  width: 500px;\n}\n.v-sheet h2[data-v-6013fdea] {\n  margin-bottom: 25px;\n}\n.v-sheet .action-buttons[data-v-6013fdea] {\n  display: flex;\n  justify-content: space-between;\n  margin: 30px 0px;\n}\n.v-sheet .action-buttons .save-button[data-v-6013fdea] {\n  --v-button-background-color-disabled: var(--background-normal-alt);\n}\n.v-sheet .action-buttons .cancel-button[data-v-6013fdea] {\n  --v-button-background-color: var(--red);\n  --v-button-background-color-hover: var(--red-75);\n  --v-button-color: #d9c5c5;\n  --v-button-color-hover: #d9c5c5;\n}";
 styleInject(css_248z$1);
 
 script$1.render = render$1;
@@ -205,34 +270,49 @@ var script = {
         var emit = _a.emit;
         var system = inject("system");
         var values = inject("values");
+        var loading = ref(false);
         var dialogOpen = ref(false);
         var singlePropositionsIDs = ref([]);
-        ref([]);
+        var selectionOptions = ref([]);
         watch(values, function (currentValues) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, e_1;
+            var _a, avaiablePropositions, e_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _b.trys.push([0, 3, , 4]);
-                        if (!currentValues.proposicao) return [3, 2];
+                        loading.value = true;
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 5, , 6]);
+                        if (!currentValues.proposicao) return [3, 3];
                         _a = singlePropositionsIDs;
                         return [4, getItemByItemIDs(currentValues.proposicao, system)];
-                    case 1:
+                    case 2:
                         _a.value = _b.sent();
-                        _b.label = 2;
-                    case 2: return [3, 4];
-                    case 3:
+                        _b.label = 3;
+                    case 3: return [4, system.api.get("items/proposicoes", {
+                            params: {
+                                filter: getFilters(singlePropositionsIDs.value),
+                            },
+                        })];
+                    case 4:
+                        avaiablePropositions = (_b.sent()).data.data;
+                        selectionOptions.value =
+                            getSelectOptions(avaiablePropositions);
+                        return [3, 6];
+                    case 5:
                         e_1 = _b.sent();
                         console.error(e_1);
-                        return [3, 4];
-                    case 4: return [2];
+                        return [3, 6];
+                    case 6:
+                        loading.value = false;
+                        return [2];
                 }
             });
         }); }, { immediate: true });
-        var handleListInput = function (changes) {
-            emit("input", changes);
+        var handleInput = function (propositions) {
+            emit("input", __spreadArray(__spreadArray([], props.value), propositions));
         };
-        return { handleListInput: handleListInput, dialogOpen: dialogOpen };
+        return { handleInput: handleInput, dialogOpen: dialogOpen, selectionOptions: selectionOptions, loading: loading };
     },
 };
 
@@ -250,22 +330,25 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       field: "proposicao_bloco",
       enableSelect: false,
       value: $props.value,
-      onInput: $setup.handleListInput,
+      onInput: _ctx.handleListInput,
       template: `{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}}`
     }, null, 8 /* PROPS */, ["value", "onInput", "template"]),
     createVNode(_component_v_button, {
       class: "selection-button",
-      onClick: _cache[1] || (_cache[1] = $event => ($setup.dialogOpen = true))
+      onClick: _cache[1] || (_cache[1] = $event => ($setup.dialogOpen = true)),
+      disabled: $setup.loading
     }, {
       default: withCtx(() => [
         _hoisted_2
       ]),
       _: 1 /* STABLE */
-    }),
+    }, 8 /* PROPS */, ["disabled"]),
     createVNode(_component_selection_dialog, {
       open: $setup.dialogOpen,
-      onClose: _cache[2] || (_cache[2] = $event => ($setup.dialogOpen = false))
-    }, null, 8 /* PROPS */, ["open"])
+      options: $setup.selectionOptions,
+      onInput: _cache[2] || (_cache[2] = $event => ($setup.handleInput($event))),
+      onClose: _cache[3] || (_cache[3] = $event => ($setup.dialogOpen = false))
+    }, null, 8 /* PROPS */, ["open", "options"])
   ]))
 }
 

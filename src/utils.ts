@@ -51,3 +51,24 @@ export const getItemByItemIDs = async (propositions: any, system: any) => {
 
     return removeArrayDuplicates(idList)
 }
+
+export const getFilters = (propositions: any[]) => {
+    const filter: any = {
+        status: {
+            _eq: "aguardando",
+        },
+    }
+
+    if (propositions.length > 0) {
+        filter.id = { _nin: propositions }
+    }
+
+    return filter
+}
+
+export const getSelectOptions = (validPropositions: any[]) => {
+    return validPropositions.map((el: any) => ({
+        text: `${el.titulo} - ${el.numero}`,
+        value: { proposicoes_id: el.id },
+    }))
+}

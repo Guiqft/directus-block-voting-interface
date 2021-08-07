@@ -9,17 +9,26 @@
             :template="`{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}}`"
         />
 
-        <v-button class="selection-button" @click="dialogOpen = true">
+        <v-button
+            class="selection-button"
+            @click="dialogOpen = true"
+            :disabled="loading"
+        >
             Adicionar existente
         </v-button>
 
-        <selection-dialog :open="dialogOpen" @close="dialogOpen = false" />
+        <selection-dialog
+            :open="dialogOpen"
+            :options="selectionOptions"
+            @input="handleInput($event)"
+            @close="dialogOpen = false"
+        />
     </div>
 </template>
 
 <script lang="ts">
-import { PropType, ref, inject, watch, onMounted } from "vue"
-import { getItemByItemIDs } from "./utils"
+import { PropType, ref, inject, watch } from "vue"
+import { getFilters, getItemByItemIDs, getSelectOptions } from "./utils"
 
 import SelectionDialog from "./SelectionDialog.vue"
 
@@ -39,13 +48,16 @@ export default {
         const system = inject("system") as Record<string, any>
         const values = inject("values") as Record<string, any>
 
+        const loading = ref(false)
         const dialogOpen = ref(false)
         const singlePropositionsIDs = ref([])
-        const selection = ref([])
+
+        const selectionOptions = ref([])
 
         watch(
             values,
             async (currentValues) => {
+                loading.value = true
                 try {
                     // getting propositions item by item
                     if (currentValues.proposicao) {
@@ -54,18 +66,31 @@ export default {
                             system
                         )
                     }
+
+                    const avaiablePropositions = (
+                        await system.api.get("items/proposicoes", {
+                            params: {
+                                filter: getFilters(singlePropositionsIDs.value),
+                            },
+                        })
+                    ).data.data
+
+                    selectionOptions.value =
+                        getSelectOptions(avaiablePropositions)
                 } catch (e) {
                     console.error(e)
                 }
+
+                loading.value = false
             },
             { immediate: true }
         )
 
-        const handleListInput = (changes: string[]) => {
-            emit("input", changes)
+        const handleInput = (propositions: any[]) => {
+            emit("input", [...props.value, ...propositions])
         }
 
-        return { handleListInput, dialogOpen }
+        return { handleInput, dialogOpen, selectionOptions, loading }
     },
 }
 </script>
