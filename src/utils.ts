@@ -72,3 +72,60 @@ export const getSelectOptions = (validPropositions: any[]) => {
         value: { proposicoes_id: el.id },
     }))
 }
+
+export const conflictPropositions = async (
+    values: Record<string, any>,
+    system: any
+) => {
+    const newPropositionsItemByItemIDs = values.proposicao
+        .filter((el: any) => typeof el === "object")
+        .map((el: any) => el.proposicoes_id)
+
+    let blockPropositionsRelationsIDs = []
+
+    if (values.proposicao_bloco) {
+        if (checkForRelationIds(values.proposicao_bloco)) {
+            const responseData = (
+                await system.api.get("items/ordem_do_dia_proposicoes_1", {
+                    params: {
+                        filter: {
+                            id: {
+                                _in: values.proposicao_bloco.filter(
+                                    (el: any) => typeof el === "number"
+                                ),
+                            },
+                        },
+                    },
+                })
+            ).data.data
+
+            blockPropositionsRelationsIDs.push(
+                ...responseData.map((relation: any) => relation.proposicoes_id)
+            )
+        }
+
+        if (checkForPropositionsObjects(values.proposicao_bloco)) {
+            blockPropositionsRelationsIDs.push(
+                ...values.proposicao_bloco
+                    .filter((el: any) => typeof el === "object")
+                    .map((el: any) => el.proposicoes_id)
+            )
+        }
+
+        blockPropositionsRelationsIDs = removeArrayDuplicates(
+            blockPropositionsRelationsIDs
+        )
+
+        // if intersection length > 0, has conflicts between block and item by item
+        return arrayIntersection(
+            newPropositionsItemByItemIDs,
+            blockPropositionsRelationsIDs
+        )
+    } else {
+        return []
+    }
+}
+
+const arrayIntersection = (array1: any[], array2: any[]) => {
+    return array1.filter((value) => array2.includes(value))
+}

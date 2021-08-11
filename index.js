@@ -1,4 +1,4 @@
-import { ref, onMounted, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, createVNode, withScopeId, createTextVNode, inject, watch, withCtx } from 'vue';
+import { ref, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, createVNode, withScopeId, createTextVNode, inject, watch, Fragment, renderList, toDisplayString, createCommentVNode, withCtx } from 'vue';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -132,6 +132,45 @@ var getSelectOptions = function (validPropositions) {
         value: { proposicoes_id: el.id },
     }); });
 };
+var conflictPropositions = function (values, system) { return __awaiter(void 0, void 0, void 0, function () {
+    var newPropositionsItemByItemIDs, blockPropositionsRelationsIDs, responseData;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                newPropositionsItemByItemIDs = values.proposicao
+                    .filter(function (el) { return typeof el === "object"; })
+                    .map(function (el) { return el.proposicoes_id; });
+                blockPropositionsRelationsIDs = [];
+                if (!values.proposicao_bloco) return [3, 3];
+                if (!checkForRelationIds(values.proposicao_bloco)) return [3, 2];
+                return [4, system.api.get("items/ordem_do_dia_proposicoes_1", {
+                        params: {
+                            filter: {
+                                id: {
+                                    _in: values.proposicao_bloco.filter(function (el) { return typeof el === "number"; }),
+                                },
+                            },
+                        },
+                    })];
+            case 1:
+                responseData = (_a.sent()).data.data;
+                blockPropositionsRelationsIDs.push.apply(blockPropositionsRelationsIDs, responseData.map(function (relation) { return relation.proposicoes_id; }));
+                _a.label = 2;
+            case 2:
+                if (checkForPropositionsObjects(values.proposicao_bloco)) {
+                    blockPropositionsRelationsIDs.push.apply(blockPropositionsRelationsIDs, values.proposicao_bloco
+                        .filter(function (el) { return typeof el === "object"; })
+                        .map(function (el) { return el.proposicoes_id; }));
+                }
+                blockPropositionsRelationsIDs = removeArrayDuplicates(blockPropositionsRelationsIDs);
+                return [2, arrayIntersection(newPropositionsItemByItemIDs, blockPropositionsRelationsIDs)];
+            case 3: return [2, []];
+        }
+    });
+}); };
+var arrayIntersection = function (array1, array2) {
+    return array1.filter(function (value) { return array2.includes(value); });
+};
 
 var script$1 = {
     emits: ["input", "close"],
@@ -150,14 +189,12 @@ var script$1 = {
         };
         var emitSelection = function () {
             emit("input", selection.value);
-            emit("close");
+            emitClose();
         };
         var emitClose = function () {
+            selection.value = [];
             emit("close");
         };
-        onMounted(function () {
-            selection.value = [];
-        });
         return { selection: selection, emitClose: emitClose, handleSelection: handleSelection, emitSelection: emitSelection };
     },
 };
@@ -167,8 +204,8 @@ const _withId = /*#__PURE__*/withScopeId("data-v-6013fdea");
 pushScopeId("data-v-6013fdea");
 const _hoisted_1$1 = /*#__PURE__*/createVNode("h2", null, "Selecione uma proposição para adicionar ao bloco:", -1 /* HOISTED */);
 const _hoisted_2$1 = { class: "action-buttons" };
-const _hoisted_3 = /*#__PURE__*/createTextVNode(" Cancelar ");
-const _hoisted_4 = /*#__PURE__*/createTextVNode(" Salvar ");
+const _hoisted_3$1 = /*#__PURE__*/createTextVNode(" Cancelar ");
+const _hoisted_4$1 = /*#__PURE__*/createTextVNode(" Salvar ");
 popScopeId();
 
 const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $options) => {
@@ -198,7 +235,7 @@ const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $opt
               onClick: $setup.emitClose
             }, {
               default: _withId(() => [
-                _hoisted_3
+                _hoisted_3$1
               ]),
               _: 1 /* STABLE */
             }, 8 /* PROPS */, ["onClick"]),
@@ -208,7 +245,7 @@ const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $opt
               onClick: $setup.emitSelection
             }, {
               default: _withId(() => [
-                _hoisted_4
+                _hoisted_4$1
               ]),
               _: 1 /* STABLE */
             }, 8 /* PROPS */, ["disabled", "onClick"])
@@ -273,37 +310,57 @@ var script = {
         var loading = ref(false);
         var dialogOpen = ref(false);
         var singlePropositionsIDs = ref([]);
+        var invalidPropositions = ref([]);
         var selectionOptions = ref([]);
         watch(values, function (currentValues) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, avaiablePropositions, e_1;
+            var _a, conflictIDs, responseData, avaiablePropositions, e_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         loading.value = true;
                         _b.label = 1;
                     case 1:
-                        _b.trys.push([1, 5, , 6]);
-                        if (!currentValues.proposicao) return [3, 3];
+                        _b.trys.push([1, 8, , 9]);
+                        if (!currentValues.proposicao) return [3, 6];
                         _a = singlePropositionsIDs;
                         return [4, getItemByItemIDs(currentValues.proposicao, system)];
                     case 2:
                         _a.value = _b.sent();
-                        _b.label = 3;
-                    case 3: return [4, system.api.get("items/proposicoes", {
+                        return [4, conflictPropositions(currentValues, system)];
+                    case 3:
+                        conflictIDs = _b.sent();
+                        if (!(conflictIDs.length > 0)) return [3, 5];
+                        return [4, system.api.get("items/proposicoes", {
+                                params: {
+                                    filter: {
+                                        id: {
+                                            _in: conflictIDs,
+                                        },
+                                    },
+                                },
+                            })];
+                    case 4:
+                        responseData = (_b.sent()).data.data;
+                        invalidPropositions.value = responseData.map(function (e) { return ({ id: e.id, number: e.numero }); });
+                        return [3, 6];
+                    case 5:
+                        invalidPropositions.value = [];
+                        _b.label = 6;
+                    case 6: return [4, system.api.get("items/proposicoes", {
                             params: {
                                 filter: getFilters(singlePropositionsIDs.value),
                             },
                         })];
-                    case 4:
+                    case 7:
                         avaiablePropositions = (_b.sent()).data.data;
                         selectionOptions.value =
                             getSelectOptions(avaiablePropositions);
-                        return [3, 6];
-                    case 5:
+                        return [3, 9];
+                    case 8:
                         e_1 = _b.sent();
                         console.error(e_1);
-                        return [3, 6];
-                    case 6:
+                        return [3, 9];
+                    case 9:
                         loading.value = false;
                         return [2];
                 }
@@ -312,12 +369,23 @@ var script = {
         var handleInput = function (propositions) {
             emit("input", __spreadArray(__spreadArray([], props.value), propositions));
         };
-        return { handleInput: handleInput, dialogOpen: dialogOpen, selectionOptions: selectionOptions, loading: loading };
+        return {
+            handleInput: handleInput,
+            dialogOpen: dialogOpen,
+            selectionOptions: selectionOptions,
+            loading: loading,
+            invalidPropositions: invalidPropositions,
+        };
     },
 };
 
 const _hoisted_1 = { class: "block-voting" };
-const _hoisted_2 = /*#__PURE__*/createTextVNode(" Adicionar existente ");
+const _hoisted_2 = {
+  key: 0,
+  class: "errors"
+};
+const _hoisted_3 = /*#__PURE__*/createVNode("p", null, " As seguintes proposições não podem aparecer na votação por item e bloco ao mesmo tempo: ", -1 /* HOISTED */);
+const _hoisted_4 = /*#__PURE__*/createTextVNode(" Adicionar existente ");
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_interface_list_m2m = resolveComponent("interface-list-m2m");
@@ -325,34 +393,45 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_selection_dialog = resolveComponent("selection-dialog");
 
   return (openBlock(), createBlock("div", _hoisted_1, [
+    ($setup.invalidPropositions.length > 0)
+      ? (openBlock(), createBlock("div", _hoisted_2, [
+          _hoisted_3,
+          (openBlock(true), createBlock(Fragment, null, renderList($setup.invalidPropositions, (proposition, idx) => {
+            return (openBlock(), createBlock("li", {
+              class: "proposition-number",
+              key: idx
+            }, toDisplayString(proposition.number), 1 /* TEXT */))
+          }), 128 /* KEYED_FRAGMENT */))
+        ]))
+      : createCommentVNode("v-if", true),
     createVNode(_component_interface_list_m2m, {
       collection: "ordem_do_dia",
       field: "proposicao_bloco",
       enableSelect: false,
       value: $props.value,
-      onInput: _ctx.handleListInput,
+      onInput: _cache[1] || (_cache[1] = $event => (_ctx.$emit('input', $event))),
       template: `{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}}`
-    }, null, 8 /* PROPS */, ["value", "onInput", "template"]),
+    }, null, 8 /* PROPS */, ["value", "template"]),
     createVNode(_component_v_button, {
       class: "selection-button",
-      onClick: _cache[1] || (_cache[1] = $event => ($setup.dialogOpen = true)),
+      onClick: _cache[2] || (_cache[2] = $event => ($setup.dialogOpen = true)),
       disabled: $setup.loading
     }, {
       default: withCtx(() => [
-        _hoisted_2
+        _hoisted_4
       ]),
       _: 1 /* STABLE */
     }, 8 /* PROPS */, ["disabled"]),
     createVNode(_component_selection_dialog, {
       open: $setup.dialogOpen,
       options: $setup.selectionOptions,
-      onInput: _cache[2] || (_cache[2] = $event => ($setup.handleInput($event))),
-      onClose: _cache[3] || (_cache[3] = $event => ($setup.dialogOpen = false))
+      onInput: _cache[3] || (_cache[3] = $event => ($setup.handleInput($event))),
+      onClose: _cache[4] || (_cache[4] = $event => ($setup.dialogOpen = false))
     }, null, 8 /* PROPS */, ["open", "options"])
   ]))
 }
 
-var css_248z = ".block-voting .selection-button {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n}";
+var css_248z = ".block-voting .selection-button {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n}\n.block-voting .errors {\n  margin-bottom: 35px;\n}\n.block-voting .errors p {\n  color: var(--warning);\n}\n.block-voting .errors li {\n  margin-left: 40px;\n}";
 styleInject(css_248z);
 
 script.render = render;

@@ -1,11 +1,25 @@
 <template>
     <div class="block-voting">
+        <div class="errors" v-if="invalidPropositions.length > 0">
+            <p>
+                As seguintes proposições não podem aparecer na votação por item
+                e bloco ao mesmo tempo:
+            </p>
+            <li
+                class="proposition-number"
+                :key="idx"
+                v-for="(proposition, idx) in invalidPropositions"
+            >
+                {{ proposition.number }}
+            </li>
+        </div>
+
         <interface-list-m2m
             collection="ordem_do_dia"
             field="proposicao_bloco"
             :enableSelect="false"
             :value="value"
-            @input="handleListInput"
+            @input="$emit('input', $event)"
             :template="`{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}}`"
         />
 
@@ -28,7 +42,12 @@
 
 <script lang="ts">
 import { PropType, ref, inject, watch } from "vue"
-import { getFilters, getItemByItemIDs, getSelectOptions } from "./utils"
+import {
+    conflictPropositions,
+    getFilters,
+    getItemByItemIDs,
+    getSelectOptions,
+} from "./utils"
 
 import SelectionDialog from "./SelectionDialog.vue"
 
@@ -51,6 +70,7 @@ export default {
         const loading = ref(false)
         const dialogOpen = ref(false)
         const singlePropositionsIDs = ref([])
+        const invalidPropositions = ref([])
 
         const selectionOptions = ref([])
 
@@ -59,12 +79,37 @@ export default {
             async (currentValues) => {
                 loading.value = true
                 try {
-                    // getting propositions item by item
                     if (currentValues.proposicao) {
+                        // getting propositions item by item
                         singlePropositionsIDs.value = await getItemByItemIDs(
                             currentValues.proposicao,
                             system
                         )
+
+                        const conflictIDs = await conflictPropositions(
+                            currentValues,
+                            system
+                        )
+
+                        if (conflictIDs.length > 0) {
+                            const responseData = (
+                                await system.api.get("items/proposicoes", {
+                                    params: {
+                                        filter: {
+                                            id: {
+                                                _in: conflictIDs,
+                                            },
+                                        },
+                                    },
+                                })
+                            ).data.data
+
+                            invalidPropositions.value = responseData.map(
+                                (e: any) => ({ id: e.id, number: e.numero })
+                            )
+                        } else {
+                            invalidPropositions.value = []
+                        }
                     }
 
                     const avaiablePropositions = (
@@ -90,7 +135,13 @@ export default {
             emit("input", [...props.value, ...propositions])
         }
 
-        return { handleInput, dialogOpen, selectionOptions, loading }
+        return {
+            handleInput,
+            dialogOpen,
+            selectionOptions,
+            loading,
+            invalidPropositions,
+        }
     },
 }
 </script>
@@ -100,6 +151,17 @@ export default {
     .selection-button {
         position: absolute;
         transform: translateY(-44px) translateX(147px);
+    }
+
+    .errors {
+        margin-bottom: 35px;
+        p {
+            color: var(--warning);
+        }
+
+        li {
+            margin-left: 40px;
+        }
     }
 }
 </style>

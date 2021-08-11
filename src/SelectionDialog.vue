@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { PropType, ref, onMounted } from "vue"
+import { PropType, ref } from "vue"
 
 interface ISelectionItem {
     text: string
@@ -56,16 +56,13 @@ export default {
 
         const emitSelection = () => {
             emit("input", selection.value)
-            emit("close")
+            emitClose()
         }
 
         const emitClose = () => {
+            selection.value = []
             emit("close")
         }
-
-        onMounted(() => {
-            selection.value = []
-        })
 
         return { selection, emitClose, handleSelection, emitSelection }
     },
