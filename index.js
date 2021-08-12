@@ -1,4 +1,4 @@
-import { ref, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, createVNode, withScopeId, createTextVNode, inject, watch, Fragment, renderList, toDisplayString, createCommentVNode, withCtx } from 'vue';
+import { ref, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, createVNode, createCommentVNode, withScopeId, createTextVNode, inject, watch, Fragment, renderList, toDisplayString, withCtx } from 'vue';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -133,44 +133,58 @@ var getSelectOptions = function (validPropositions) {
     }); });
 };
 var conflictPropositions = function (values, system) { return __awaiter(void 0, void 0, void 0, function () {
-    var newPropositionsItemByItemIDs, blockPropositionsRelationsIDs, responseData;
+    var newPropositionsItemByItemIDs, blockPropositionsIDs;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 newPropositionsItemByItemIDs = values.proposicao
                     .filter(function (el) { return typeof el === "object"; })
                     .map(function (el) { return el.proposicoes_id; });
-                blockPropositionsRelationsIDs = [];
-                if (!values.proposicao_bloco) return [3, 3];
-                if (!checkForRelationIds(values.proposicao_bloco)) return [3, 2];
-                return [4, system.api.get("items/ordem_do_dia_proposicoes_1", {
-                        params: {
-                            filter: {
-                                id: {
-                                    _in: values.proposicao_bloco.filter(function (el) { return typeof el === "number"; }),
-                                },
-                            },
-                        },
-                    })];
+                return [4, getBlockPropositionsIDs(values.proposicao_bloco, system)];
             case 1:
-                responseData = (_a.sent()).data.data;
-                blockPropositionsRelationsIDs.push.apply(blockPropositionsRelationsIDs, responseData.map(function (relation) { return relation.proposicoes_id; }));
-                _a.label = 2;
-            case 2:
-                if (checkForPropositionsObjects(values.proposicao_bloco)) {
-                    blockPropositionsRelationsIDs.push.apply(blockPropositionsRelationsIDs, values.proposicao_bloco
-                        .filter(function (el) { return typeof el === "object"; })
-                        .map(function (el) { return el.proposicoes_id; }));
-                }
-                blockPropositionsRelationsIDs = removeArrayDuplicates(blockPropositionsRelationsIDs);
-                return [2, arrayIntersection(newPropositionsItemByItemIDs, blockPropositionsRelationsIDs)];
-            case 3: return [2, []];
+                blockPropositionsIDs = _a.sent();
+                console.log(blockPropositionsIDs);
+                return [2, arrayIntersection(newPropositionsItemByItemIDs, blockPropositionsIDs)];
         }
     });
 }); };
 var arrayIntersection = function (array1, array2) {
     return array1.filter(function (value) { return array2.includes(value); });
 };
+var getBlockPropositionsIDs = function (propositions, system) { return __awaiter(void 0, void 0, void 0, function () {
+    var blockPropositionsIDs, responseData;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                blockPropositionsIDs = [];
+                console.log("----------------", propositions);
+                if (!propositions) return [3, 3];
+                if (!checkForRelationIds(propositions)) return [3, 2];
+                return [4, system.api.get("items/ordem_do_dia_proposicoes_1", {
+                        params: {
+                            filter: {
+                                id: {
+                                    _in: propositions.filter(function (el) { return typeof el === "number"; }),
+                                },
+                            },
+                        },
+                    })];
+            case 1:
+                responseData = (_a.sent()).data.data;
+                blockPropositionsIDs.push.apply(blockPropositionsIDs, responseData.map(function (relation) { return relation.proposicoes_id; }));
+                _a.label = 2;
+            case 2:
+                if (checkForPropositionsObjects(propositions)) {
+                    blockPropositionsIDs.push.apply(blockPropositionsIDs, propositions
+                        .filter(function (el) { return typeof el === "object"; })
+                        .map(function (el) { return el.proposicoes_id; }));
+                }
+                blockPropositionsIDs = removeArrayDuplicates(blockPropositionsIDs);
+                _a.label = 3;
+            case 3: return [2, blockPropositionsIDs];
+        }
+    });
+}); };
 
 var script$1 = {
     emits: ["input", "close"],
@@ -203,9 +217,10 @@ const _withId = /*#__PURE__*/withScopeId("data-v-6013fdea");
 
 pushScopeId("data-v-6013fdea");
 const _hoisted_1$1 = /*#__PURE__*/createVNode("h2", null, "Selecione uma proposição para adicionar ao bloco:", -1 /* HOISTED */);
-const _hoisted_2$1 = { class: "action-buttons" };
-const _hoisted_3$1 = /*#__PURE__*/createTextVNode(" Cancelar ");
-const _hoisted_4$1 = /*#__PURE__*/createTextVNode(" Salvar ");
+const _hoisted_2$1 = { key: 0 };
+const _hoisted_3$1 = { class: "action-buttons" };
+const _hoisted_4$1 = /*#__PURE__*/createTextVNode(" Cancelar ");
+const _hoisted_5 = /*#__PURE__*/createTextVNode(" Salvar ");
 popScopeId();
 
 const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $options) => {
@@ -223,19 +238,23 @@ const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $opt
       createVNode(_component_v_sheet, null, {
         default: _withId(() => [
           _hoisted_1$1,
+          ($props.options.length === 0)
+            ? (openBlock(), createBlock("p", _hoisted_2$1, "Não há proposições disponíveis"))
+            : createCommentVNode("v-if", true),
           createVNode(_component_v_select, {
             "model-value": $setup.selection,
             "onUpdate:modelValue": $setup.handleSelection,
             items: $props.options,
+            disabled: $props.options.length === 0,
             multiple: ""
-          }, null, 8 /* PROPS */, ["model-value", "onUpdate:modelValue", "items"]),
-          createVNode("div", _hoisted_2$1, [
+          }, null, 8 /* PROPS */, ["model-value", "onUpdate:modelValue", "items", "disabled"]),
+          createVNode("div", _hoisted_3$1, [
             createVNode(_component_v_button, {
               class: "cancel-button",
               onClick: $setup.emitClose
             }, {
               default: _withId(() => [
-                _hoisted_3$1
+                _hoisted_4$1
               ]),
               _: 1 /* STABLE */
             }, 8 /* PROPS */, ["onClick"]),
@@ -245,7 +264,7 @@ const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $opt
               onClick: $setup.emitSelection
             }, {
               default: _withId(() => [
-                _hoisted_4$1
+                _hoisted_5
               ]),
               _: 1 /* STABLE */
             }, 8 /* PROPS */, ["disabled", "onClick"])
@@ -285,7 +304,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z$1 = ".v-sheet[data-v-6013fdea] {\n  width: 500px;\n}\n.v-sheet h2[data-v-6013fdea] {\n  margin-bottom: 25px;\n}\n.v-sheet .action-buttons[data-v-6013fdea] {\n  display: flex;\n  justify-content: space-between;\n  margin: 30px 0px;\n}\n.v-sheet .action-buttons .save-button[data-v-6013fdea] {\n  --v-button-background-color-disabled: var(--background-normal-alt);\n}\n.v-sheet .action-buttons .cancel-button[data-v-6013fdea] {\n  --v-button-background-color: var(--red);\n  --v-button-background-color-hover: var(--red-75);\n  --v-button-color: #d9c5c5;\n  --v-button-color-hover: #d9c5c5;\n}";
+var css_248z$1 = ".v-sheet[data-v-6013fdea] {\n  width: 500px;\n}\n.v-sheet h2[data-v-6013fdea] {\n  margin-bottom: 25px;\n}\n.v-sheet p[data-v-6013fdea] {\n  color: var(--warning);\n}\n.v-sheet .action-buttons[data-v-6013fdea] {\n  display: flex;\n  justify-content: space-between;\n  margin: 30px 0px;\n}\n.v-sheet .action-buttons .save-button[data-v-6013fdea] {\n  --v-button-background-color-disabled: var(--background-normal-alt);\n}\n.v-sheet .action-buttons .cancel-button[data-v-6013fdea] {\n  --v-button-background-color: var(--red);\n  --v-button-background-color-hover: var(--red-75);\n  --v-button-color: #d9c5c5;\n  --v-button-color-hover: #d9c5c5;\n}";
 styleInject(css_248z$1);
 
 script$1.render = render$1;
@@ -313,22 +332,23 @@ var script = {
         var invalidPropositions = ref([]);
         var selectionOptions = ref([]);
         watch(values, function (currentValues) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, conflictIDs, responseData, avaiablePropositions, e_1;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var _a, conflictIDs, responseData, avaiablePropositions, _b, _c, _d, _e, _f, e_1;
+            var _g, _h;
+            return __generator(this, function (_j) {
+                switch (_j.label) {
                     case 0:
                         loading.value = true;
-                        _b.label = 1;
+                        _j.label = 1;
                     case 1:
-                        _b.trys.push([1, 8, , 9]);
+                        _j.trys.push([1, 9, , 10]);
                         if (!currentValues.proposicao) return [3, 6];
                         _a = singlePropositionsIDs;
                         return [4, getItemByItemIDs(currentValues.proposicao, system)];
                     case 2:
-                        _a.value = _b.sent();
+                        _a.value = _j.sent();
                         return [4, conflictPropositions(currentValues, system)];
                     case 3:
-                        conflictIDs = _b.sent();
+                        conflictIDs = _j.sent();
                         if (!(conflictIDs.length > 0)) return [3, 5];
                         return [4, system.api.get("items/proposicoes", {
                                 params: {
@@ -340,27 +360,33 @@ var script = {
                                 },
                             })];
                     case 4:
-                        responseData = (_b.sent()).data.data;
+                        responseData = (_j.sent()).data.data;
                         invalidPropositions.value = responseData.map(function (e) { return ({ id: e.id, number: e.numero }); });
                         return [3, 6];
                     case 5:
                         invalidPropositions.value = [];
-                        _b.label = 6;
-                    case 6: return [4, system.api.get("items/proposicoes", {
-                            params: {
-                                filter: getFilters(singlePropositionsIDs.value),
-                            },
-                        })];
-                    case 7:
-                        avaiablePropositions = (_b.sent()).data.data;
+                        _j.label = 6;
+                    case 6:
+                        _c = (_b = system.api).get;
+                        _d = ["items/proposicoes"];
+                        _g = {};
+                        _h = {};
+                        _e = getFilters;
+                        _f = [__spreadArray([], singlePropositionsIDs.value)];
+                        return [4, getBlockPropositionsIDs(currentValues.proposicao_bloco, system)];
+                    case 7: return [4, _c.apply(_b, _d.concat([(_g.params = (_h.filter = _e.apply(void 0, [__spreadArray.apply(void 0, _f.concat([(_j.sent())]))]),
+                                _h),
+                                _g)]))];
+                    case 8:
+                        avaiablePropositions = (_j.sent()).data.data;
                         selectionOptions.value =
                             getSelectOptions(avaiablePropositions);
-                        return [3, 9];
-                    case 8:
-                        e_1 = _b.sent();
-                        console.error(e_1);
-                        return [3, 9];
+                        return [3, 10];
                     case 9:
+                        e_1 = _j.sent();
+                        console.error(e_1);
+                        return [3, 10];
+                    case 10:
                         loading.value = false;
                         return [2];
                 }

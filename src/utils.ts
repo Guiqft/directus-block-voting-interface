@@ -81,16 +81,34 @@ export const conflictPropositions = async (
         .filter((el: any) => typeof el === "object")
         .map((el: any) => el.proposicoes_id)
 
-    let blockPropositionsRelationsIDs = []
+    const blockPropositionsIDs = await getBlockPropositionsIDs(
+        values.proposicao_bloco,
+        system
+    )
+    console.log(blockPropositionsIDs)
 
-    if (values.proposicao_bloco) {
-        if (checkForRelationIds(values.proposicao_bloco)) {
+    // if intersection length > 0, has conflicts between block and item by item
+    return arrayIntersection(newPropositionsItemByItemIDs, blockPropositionsIDs)
+}
+
+const arrayIntersection = (array1: any[], array2: any[]) => {
+    return array1.filter((value) => array2.includes(value))
+}
+
+export const getBlockPropositionsIDs = async (
+    propositions: any[],
+    system: any
+) => {
+    let blockPropositionsIDs = [] as any[]
+    console.log("----------------", propositions)
+    if (propositions) {
+        if (checkForRelationIds(propositions)) {
             const responseData = (
                 await system.api.get("items/ordem_do_dia_proposicoes_1", {
                     params: {
                         filter: {
                             id: {
-                                _in: values.proposicao_bloco.filter(
+                                _in: propositions.filter(
                                     (el: any) => typeof el === "number"
                                 ),
                             },
@@ -99,33 +117,21 @@ export const conflictPropositions = async (
                 })
             ).data.data
 
-            blockPropositionsRelationsIDs.push(
+            blockPropositionsIDs.push(
                 ...responseData.map((relation: any) => relation.proposicoes_id)
             )
         }
 
-        if (checkForPropositionsObjects(values.proposicao_bloco)) {
-            blockPropositionsRelationsIDs.push(
-                ...values.proposicao_bloco
+        if (checkForPropositionsObjects(propositions)) {
+            blockPropositionsIDs.push(
+                ...propositions
                     .filter((el: any) => typeof el === "object")
                     .map((el: any) => el.proposicoes_id)
             )
         }
 
-        blockPropositionsRelationsIDs = removeArrayDuplicates(
-            blockPropositionsRelationsIDs
-        )
-
-        // if intersection length > 0, has conflicts between block and item by item
-        return arrayIntersection(
-            newPropositionsItemByItemIDs,
-            blockPropositionsRelationsIDs
-        )
-    } else {
-        return []
+        blockPropositionsIDs = removeArrayDuplicates(blockPropositionsIDs)
     }
-}
 
-const arrayIntersection = (array1: any[], array2: any[]) => {
-    return array1.filter((value) => array2.includes(value))
+    return blockPropositionsIDs
 }

@@ -44,6 +44,7 @@
 import { PropType, ref, inject, watch } from "vue"
 import {
     conflictPropositions,
+    getBlockPropositionsIDs,
     getFilters,
     getItemByItemIDs,
     getSelectOptions,
@@ -115,7 +116,13 @@ export default {
                     const avaiablePropositions = (
                         await system.api.get("items/proposicoes", {
                             params: {
-                                filter: getFilters(singlePropositionsIDs.value),
+                                filter: getFilters([
+                                    ...singlePropositionsIDs.value,
+                                    ...(await getBlockPropositionsIDs(
+                                        currentValues.proposicao_bloco,
+                                        system
+                                    )),
+                                ]),
                             },
                         })
                     ).data.data

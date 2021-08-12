@@ -6,10 +6,12 @@
     >
         <v-sheet>
             <h2>Selecione uma proposição para adicionar ao bloco:</h2>
+            <p v-if="options.length === 0">Não há proposições disponíveis</p>
             <v-select
                 :model-value="selection"
                 @update:modelValue="handleSelection"
                 :items="options"
+                :disabled="options.length === 0"
                 multiple
             />
 
@@ -74,6 +76,10 @@ export default {
     width: 500px;
     h2 {
         margin-bottom: 25px;
+    }
+
+    p {
+        color: var(--warning);
     }
 
     .action-buttons {
