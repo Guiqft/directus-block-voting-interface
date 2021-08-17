@@ -68,7 +68,7 @@ export const getFilters = (propositions: any[]) => {
 
 export const getSelectOptions = (validPropositions: any[]) => {
     return validPropositions.map((el: any) => ({
-        text: `${el.titulo} - ${el.numero}`,
+        text: `${el.titulo} - ${el.numero} - ${el.tipo}`,
         value: { proposicoes_id: el.id },
     }))
 }

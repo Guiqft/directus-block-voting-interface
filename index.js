@@ -1,4 +1,4 @@
-import { ref, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, createVNode, createCommentVNode, withScopeId, createTextVNode, inject, watch, Fragment, renderList, toDisplayString, withCtx } from 'vue';
+import { ref, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, createVNode, createCommentVNode, withScopeId, createTextVNode, inject, watch, Fragment, renderList, withCtx } from 'vue';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -128,7 +128,7 @@ var getFilters = function (propositions) {
 };
 var getSelectOptions = function (validPropositions) {
     return validPropositions.map(function (el) { return ({
-        text: el.titulo + " - " + el.numero,
+        text: el.titulo + " - " + el.numero + " - " + el.tipo,
         value: { proposicoes_id: el.id },
     }); });
 };
@@ -361,7 +361,13 @@ var script = {
                             })];
                     case 4:
                         responseData = (_j.sent()).data.data;
-                        invalidPropositions.value = responseData.map(function (e) { return ({ id: e.id, number: e.numero }); });
+                        invalidPropositions.value = responseData.map(function (e) { return ({
+                            id: e.id,
+                            status: e.status,
+                            titulo: e.titulo,
+                            tipo: e.tipo,
+                            numero: e.numero,
+                        }); });
                         return [3, 6];
                     case 5:
                         invalidPropositions.value = [];
@@ -414,6 +420,7 @@ const _hoisted_3 = /*#__PURE__*/createVNode("p", null, " As seguintes proposiÃ§Ã
 const _hoisted_4 = /*#__PURE__*/createTextVNode(" Adicionar existente ");
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_render_template = resolveComponent("render-template");
   const _component_interface_list_m2m = resolveComponent("interface-list-m2m");
   const _component_v_button = resolveComponent("v-button");
   const _component_selection_dialog = resolveComponent("selection-dialog");
@@ -422,11 +429,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     ($setup.invalidPropositions.length > 0)
       ? (openBlock(), createBlock("div", _hoisted_2, [
           _hoisted_3,
-          (openBlock(true), createBlock(Fragment, null, renderList($setup.invalidPropositions, (proposition, idx) => {
-            return (openBlock(), createBlock("li", {
-              class: "proposition-number",
-              key: idx
-            }, toDisplayString(proposition.number), 1 /* TEXT */))
+          (openBlock(true), createBlock(Fragment, null, renderList($setup.invalidPropositions, (proposition) => {
+            return (openBlock(), createBlock(_component_render_template, {
+              key: proposition.id,
+              collection: "proposicoes",
+              item: proposition,
+              template: `{{titulo}} - {{numero}} - {{tipo}}`
+            }, null, 8 /* PROPS */, ["item"]))
           }), 128 /* KEYED_FRAGMENT */))
         ]))
       : createCommentVNode("v-if", true),
@@ -436,7 +445,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       enableSelect: false,
       value: $props.value,
       onInput: _cache[1] || (_cache[1] = $event => (_ctx.$emit('input', $event))),
-      template: `{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}}`
+      template: `{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}} - {{proposicoes_id.tipo}}`
     }, null, 8 /* PROPS */, ["value", "template"]),
     createVNode(_component_v_button, {
       class: "selection-button",
@@ -457,7 +466,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ]))
 }
 
-var css_248z = ".block-voting .selection-button {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n}\n.block-voting .errors {\n  margin-bottom: 35px;\n}\n.block-voting .errors p {\n  color: var(--warning);\n}\n.block-voting .errors li {\n  margin-left: 40px;\n}";
+var css_248z = ".block-voting .selection-button {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n}\n.block-voting .errors {\n  margin-bottom: 35px;\n}\n.block-voting .errors p {\n  color: var(--warning);\n}\n.block-voting .errors .render-template {\n  margin: 3px 0px;\n}";
 styleInject(css_248z);
 
 script.render = render;

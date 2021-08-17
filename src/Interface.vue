@@ -5,13 +5,13 @@
                 As seguintes proposições não podem aparecer na votação por item
                 e bloco ao mesmo tempo:
             </p>
-            <li
-                class="proposition-number"
-                :key="idx"
-                v-for="(proposition, idx) in invalidPropositions"
-            >
-                {{ proposition.number }}
-            </li>
+            <render-template
+                :key="proposition.id"
+                v-for="proposition in invalidPropositions"
+                collection="proposicoes"
+                :item="proposition"
+                :template="`{{titulo}} - {{numero}} - {{tipo}}`"
+            />
         </div>
 
         <interface-list-m2m
@@ -20,7 +20,7 @@
             :enableSelect="false"
             :value="value"
             @input="$emit('input', $event)"
-            :template="`{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}}`"
+            :template="`{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}} - {{proposicoes_id.tipo}}`"
         />
 
         <v-button
@@ -106,7 +106,13 @@ export default {
                             ).data.data
 
                             invalidPropositions.value = responseData.map(
-                                (e: any) => ({ id: e.id, number: e.numero })
+                                (e: any) => ({
+                                    id: e.id,
+                                    status: e.status,
+                                    titulo: e.titulo,
+                                    tipo: e.tipo,
+                                    numero: e.numero,
+                                })
                             )
                         } else {
                             invalidPropositions.value = []
@@ -166,8 +172,8 @@ export default {
             color: var(--warning);
         }
 
-        li {
-            margin-left: 40px;
+        .render-template {
+            margin: 3px 0px;
         }
     }
 }
