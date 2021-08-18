@@ -61,8 +61,20 @@ export default {
                 value: "aguardando",
             },
             {
+                title: "Em discussão",
+                value: "discussao",
+            },
+            {
                 title: "Em votação",
                 value: "votacao",
+            },
+            {
+                title: "Aprovada",
+                value: "aprovada",
+            },
+            {
+                title: "Reprovada",
+                value: "reprovada",
             },
         ]
 

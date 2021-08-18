@@ -155,7 +155,7 @@ export default {
         )
 
         const handleInput = (propositions: any[]) => {
-            emit("input", [...props.value, ...propositions])
+            emit("input", [...(props.value || []), ...propositions])
         }
 
         const forceUpdate = () => {

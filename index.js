@@ -349,8 +349,20 @@ var script$1 = {
                 value: "aguardando",
             },
             {
+                title: "Em discussão",
+                value: "discussao",
+            },
+            {
                 title: "Em votação",
                 value: "votacao",
+            },
+            {
+                title: "Aprovada",
+                value: "aprovada",
+            },
+            {
+                title: "Reprovada",
+                value: "reprovada",
             },
         ];
         var changePropositionStatus = function (newStatus) { return __awaiter(_this, void 0, void 0, function () {
@@ -559,7 +571,7 @@ var script = {
             });
         }); }, { immediate: true });
         var handleInput = function (propositions) {
-            emit("input", __spreadArray(__spreadArray([], props.value), propositions));
+            emit("input", __spreadArray(__spreadArray([], (props.value || [])), propositions));
         };
         var forceUpdate = function () {
             update.value = !update.value;
