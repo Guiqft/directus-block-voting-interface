@@ -15,6 +15,7 @@
         </div>
 
         <interface-list-m2m
+            :key="update"
             collection="ordem_do_dia"
             field="proposicao_bloco"
             :enableSelect="false"
@@ -23,13 +24,17 @@
             :template="`{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}} - {{proposicoes_id.tipo}}`"
         />
 
-        <v-button
-            class="selection-button"
-            @click="dialogOpen = true"
-            :disabled="loading"
-        >
-            Adicionar existente
-        </v-button>
+        <div class="action-buttons">
+            <v-button @click="dialogOpen = true" :disabled="loading">
+                Adicionar existente
+            </v-button>
+            <status-select
+                :propositions="value"
+                :primaryKey="primaryKey"
+                :disabled="loading || invalidPropositions.length > 0"
+                @update="forceUpdate()"
+            />
+        </div>
 
         <selection-dialog
             :open="dialogOpen"
@@ -51,10 +56,11 @@ import {
 } from "./utils"
 
 import SelectionDialog from "./SelectionDialog.vue"
+import StatusSelect from "./StatusSelect.vue"
 
 export default {
     emits: ["input"],
-    components: { SelectionDialog },
+    components: { SelectionDialog, StatusSelect },
     props: {
         value: {
             type: Array as PropType<
@@ -62,6 +68,9 @@ export default {
             >,
             required: true,
             default: null,
+        },
+        primaryKey: {
+            type: String,
         },
     },
     setup(props, { emit }) {
@@ -72,6 +81,7 @@ export default {
         const dialogOpen = ref(false)
         const singlePropositionsIDs = ref([])
         const invalidPropositions = ref([])
+        const update = ref(false)
 
         const selectionOptions = ref([])
 
@@ -148,12 +158,18 @@ export default {
             emit("input", [...props.value, ...propositions])
         }
 
+        const forceUpdate = () => {
+            update.value = !update.value
+        }
+
         return {
             handleInput,
             dialogOpen,
             selectionOptions,
             loading,
             invalidPropositions,
+            update,
+            forceUpdate,
         }
     },
 }
@@ -161,9 +177,11 @@ export default {
 
 <style lang="scss">
 .block-voting {
-    .selection-button {
+    .action-buttons {
         position: absolute;
         transform: translateY(-44px) translateX(147px);
+        display: flex;
+        flex-direction: row;
     }
 
     .errors {

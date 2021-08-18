@@ -67,8 +67,18 @@ export const getFilters = (propositions: any[]) => {
 }
 
 export const getSelectOptions = (validPropositions: any[]) => {
+    const typeMap = {
+        projetoexe: "Projeto do Executivo",
+        projetoleg: "Projeto do Legislativo",
+        requerimento: "Requerimento",
+        indicacao: "Indicação",
+        mocao: "Moção",
+        decreto: "Decreto Interno",
+        emenda: "Emenda",
+    } as Record<string, string>
+
     return validPropositions.map((el: any) => ({
-        text: `${el.titulo} - ${el.numero} - ${el.tipo}`,
+        text: `${el.titulo} - ${el.numero} - ${typeMap[el.tipo as string]}`,
         value: { proposicoes_id: el.id },
     }))
 }
@@ -85,8 +95,6 @@ export const conflictPropositions = async (
         values.proposicao_bloco,
         system
     )
-    console.log(blockPropositionsIDs)
-
     // if intersection length > 0, has conflicts between block and item by item
     return arrayIntersection(newPropositionsItemByItemIDs, blockPropositionsIDs)
 }
@@ -100,7 +108,6 @@ export const getBlockPropositionsIDs = async (
     system: any
 ) => {
     let blockPropositionsIDs = [] as any[]
-    console.log("----------------", propositions)
     if (propositions) {
         if (checkForRelationIds(propositions)) {
             const responseData = (

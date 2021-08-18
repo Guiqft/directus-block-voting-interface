@@ -1,4 +1,4 @@
-import { ref, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, createVNode, createCommentVNode, withScopeId, createTextVNode, inject, watch, Fragment, renderList, withCtx } from 'vue';
+import { ref, pushScopeId, popScopeId, resolveComponent, openBlock, createBlock, createVNode, createCommentVNode, withScopeId, createTextVNode, inject, Fragment, renderList, toDisplayString, watch, withCtx } from 'vue';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -127,8 +127,17 @@ var getFilters = function (propositions) {
     return filter;
 };
 var getSelectOptions = function (validPropositions) {
+    var typeMap = {
+        projetoexe: "Projeto do Executivo",
+        projetoleg: "Projeto do Legislativo",
+        requerimento: "Requerimento",
+        indicacao: "Indicação",
+        mocao: "Moção",
+        decreto: "Decreto Interno",
+        emenda: "Emenda",
+    };
     return validPropositions.map(function (el) { return ({
-        text: el.titulo + " - " + el.numero + " - " + el.tipo,
+        text: el.titulo + " - " + el.numero + " - " + typeMap[el.tipo],
         value: { proposicoes_id: el.id },
     }); });
 };
@@ -143,7 +152,6 @@ var conflictPropositions = function (values, system) { return __awaiter(void 0, 
                 return [4, getBlockPropositionsIDs(values.proposicao_bloco, system)];
             case 1:
                 blockPropositionsIDs = _a.sent();
-                console.log(blockPropositionsIDs);
                 return [2, arrayIntersection(newPropositionsItemByItemIDs, blockPropositionsIDs)];
         }
     });
@@ -157,7 +165,6 @@ var getBlockPropositionsIDs = function (propositions, system) { return __awaiter
         switch (_a.label) {
             case 0:
                 blockPropositionsIDs = [];
-                console.log("----------------", propositions);
                 if (!propositions) return [3, 3];
                 if (!checkForRelationIds(propositions)) return [3, 2];
                 return [4, system.api.get("items/ordem_do_dia_proposicoes_1", {
@@ -186,7 +193,7 @@ var getBlockPropositionsIDs = function (propositions, system) { return __awaiter
     });
 }); };
 
-var script$1 = {
+var script$2 = {
     emits: ["input", "close"],
     props: {
         open: { type: Boolean, default: false, required: true },
@@ -213,17 +220,17 @@ var script$1 = {
     },
 };
 
-const _withId = /*#__PURE__*/withScopeId("data-v-6013fdea");
+const _withId$1 = /*#__PURE__*/withScopeId("data-v-6013fdea");
 
 pushScopeId("data-v-6013fdea");
-const _hoisted_1$1 = /*#__PURE__*/createVNode("h2", null, "Selecione uma proposição para adicionar ao bloco:", -1 /* HOISTED */);
-const _hoisted_2$1 = { key: 0 };
+const _hoisted_1$2 = /*#__PURE__*/createVNode("h2", null, "Selecione uma proposição para adicionar ao bloco:", -1 /* HOISTED */);
+const _hoisted_2$2 = { key: 0 };
 const _hoisted_3$1 = { class: "action-buttons" };
 const _hoisted_4$1 = /*#__PURE__*/createTextVNode(" Cancelar ");
-const _hoisted_5 = /*#__PURE__*/createTextVNode(" Salvar ");
+const _hoisted_5$1 = /*#__PURE__*/createTextVNode(" Salvar ");
 popScopeId();
 
-const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $options) => {
+const render$2 = /*#__PURE__*/_withId$1((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_v_select = resolveComponent("v-select");
   const _component_v_button = resolveComponent("v-button");
   const _component_v_sheet = resolveComponent("v-sheet");
@@ -234,12 +241,12 @@ const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $opt
     "onUpdate:modelValue": $setup.emitClose,
     onEsc: $setup.emitClose
   }, {
-    default: _withId(() => [
+    default: _withId$1(() => [
       createVNode(_component_v_sheet, null, {
-        default: _withId(() => [
-          _hoisted_1$1,
+        default: _withId$1(() => [
+          _hoisted_1$2,
           ($props.options.length === 0)
-            ? (openBlock(), createBlock("p", _hoisted_2$1, "Não há proposições disponíveis"))
+            ? (openBlock(), createBlock("p", _hoisted_2$2, "Não há proposições disponíveis"))
             : createCommentVNode("v-if", true),
           createVNode(_component_v_select, {
             "model-value": $setup.selection,
@@ -253,7 +260,7 @@ const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $opt
               class: "cancel-button",
               onClick: $setup.emitClose
             }, {
-              default: _withId(() => [
+              default: _withId$1(() => [
                 _hoisted_4$1
               ]),
               _: 1 /* STABLE */
@@ -263,8 +270,8 @@ const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $opt
               disabled: !($setup.selection.length > 0),
               onClick: $setup.emitSelection
             }, {
-              default: _withId(() => [
-                _hoisted_5
+              default: _withId$1(() => [
+                _hoisted_5$1
               ]),
               _: 1 /* STABLE */
             }, 8 /* PROPS */, ["disabled", "onClick"])
@@ -304,21 +311,173 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z$1 = ".v-sheet[data-v-6013fdea] {\n  width: 500px;\n}\n.v-sheet h2[data-v-6013fdea] {\n  margin-bottom: 25px;\n}\n.v-sheet p[data-v-6013fdea] {\n  color: var(--warning);\n}\n.v-sheet .action-buttons[data-v-6013fdea] {\n  display: flex;\n  justify-content: space-between;\n  margin: 30px 0px;\n}\n.v-sheet .action-buttons .save-button[data-v-6013fdea] {\n  --v-button-background-color-disabled: var(--background-normal-alt);\n}\n.v-sheet .action-buttons .cancel-button[data-v-6013fdea] {\n  --v-button-background-color: var(--red);\n  --v-button-background-color-hover: var(--red-75);\n  --v-button-color: #d9c5c5;\n  --v-button-color-hover: #d9c5c5;\n}";
+var css_248z$2 = ".v-sheet[data-v-6013fdea] {\n  width: 500px;\n}\n.v-sheet h2[data-v-6013fdea] {\n  margin-bottom: 25px;\n}\n.v-sheet p[data-v-6013fdea] {\n  color: var(--warning);\n}\n.v-sheet .action-buttons[data-v-6013fdea] {\n  display: flex;\n  justify-content: space-between;\n  margin: 30px 0px;\n}\n.v-sheet .action-buttons .save-button[data-v-6013fdea] {\n  --v-button-background-color-disabled: var(--background-normal-alt);\n}\n.v-sheet .action-buttons .cancel-button[data-v-6013fdea] {\n  --v-button-background-color: var(--red);\n  --v-button-background-color-hover: var(--red-75);\n  --v-button-color: #d9c5c5;\n  --v-button-color-hover: #d9c5c5;\n}";
+styleInject(css_248z$2);
+
+script$2.render = render$2;
+script$2.__scopeId = "data-v-6013fdea";
+script$2.__file = "src/SelectionDialog.vue";
+
+var script$1 = {
+    emits: ["update"],
+    props: {
+        primaryKey: {
+            type: String,
+            required: true,
+        },
+        disabled: {
+            type: Boolean,
+            required: true,
+        },
+        propositions: {
+            type: Array,
+            required: true,
+        },
+    },
+    setup: function (props, _a) {
+        var _this = this;
+        var emit = _a.emit;
+        var system = inject("system");
+        var isOpen = ref(false);
+        var loading = ref(false);
+        var toggleOpen = function () {
+            isOpen.value = !isOpen.value;
+        };
+        var statusList = [
+            {
+                title: "Aguardando",
+                value: "aguardando",
+            },
+            {
+                title: "Em votação",
+                value: "votacao",
+            },
+        ];
+        var changePropositionStatus = function (newStatus) { return __awaiter(_this, void 0, void 0, function () {
+            var propositionsIDs, relationIDs, relationsData;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        loading.value = true;
+                        propositionsIDs = props.propositions
+                            .filter(function (el) { return typeof el === "object"; })
+                            .map(function (el) { return el.proposicoes_id; });
+                        relationIDs = props.propositions.filter(function (el) { return typeof el === "number"; });
+                        return [4, system.api.get("items/ordem_do_dia_proposicoes_1", {
+                                params: { filter: { id: { _in: relationIDs } } },
+                            })];
+                    case 1:
+                        relationsData = (_a.sent()).data.data;
+                        relationsData.map(function (proposition) {
+                            return propositionsIDs.push(proposition.proposicoes_id);
+                        });
+                        return [4, system.api.patch("items/proposicoes", {
+                                keys: propositionsIDs,
+                                data: { status: newStatus },
+                            })];
+                    case 2:
+                        _a.sent();
+                        loading.value = false;
+                        emit("update");
+                        return [2];
+                }
+            });
+        }); };
+        return {
+            isOpen: isOpen,
+            toggleOpen: toggleOpen,
+            statusList: statusList,
+            changePropositionStatus: changePropositionStatus,
+            loading: loading,
+        };
+    },
+};
+
+const _withId = /*#__PURE__*/withScopeId("data-v-09353107");
+
+pushScopeId("data-v-09353107");
+const _hoisted_1$1 = { class: "status-select" };
+const _hoisted_2$1 = /*#__PURE__*/createTextVNode(" Alterar status ");
+popScopeId();
+
+const render$1 = /*#__PURE__*/_withId((_ctx, _cache, $props, $setup, $data, $options) => {
+  const _component_v_icon = resolveComponent("v-icon");
+  const _component_v_progress_circular = resolveComponent("v-progress-circular");
+  const _component_v_button = resolveComponent("v-button");
+  const _component_v_list_item = resolveComponent("v-list-item");
+  const _component_v_list = resolveComponent("v-list");
+  const _component_transition_expand = resolveComponent("transition-expand");
+
+  return (openBlock(), createBlock("div", _hoisted_1$1, [
+    (!($props.primaryKey === '+'))
+      ? (openBlock(), createBlock(_component_v_button, {
+          key: 0,
+          onClick: $setup.toggleOpen,
+          disabled: $props.disabled || $props.propositions.length === 0,
+          loading: $setup.loading
+        }, {
+          loading: _withId(() => [
+            createVNode(_component_v_progress_circular, { indeterminate: "" })
+          ]),
+          default: _withId(() => [
+            _hoisted_2$1,
+            ($setup.isOpen)
+              ? (openBlock(), createBlock(_component_v_icon, {
+                  key: 0,
+                  name: "arrow_drop_up"
+                }))
+              : (openBlock(), createBlock(_component_v_icon, {
+                  key: 1,
+                  name: "arrow_drop_down"
+                }))
+          ]),
+          _: 1 /* STABLE */
+        }, 8 /* PROPS */, ["onClick", "disabled", "loading"]))
+      : createCommentVNode("v-if", true),
+    createVNode(_component_transition_expand, null, {
+      default: _withId(() => [
+        ($setup.isOpen)
+          ? (openBlock(), createBlock(_component_v_list, { key: 0 }, {
+              default: _withId(() => [
+                (openBlock(true), createBlock(Fragment, null, renderList($setup.statusList, (item, idx) => {
+                  return (openBlock(), createBlock(_component_v_list_item, {
+                    key: idx,
+                    onClick: $event => ($setup.changePropositionStatus(item.value))
+                  }, {
+                    default: _withId(() => [
+                      createTextVNode(toDisplayString(item.title), 1 /* TEXT */)
+                    ]),
+                    _: 2 /* DYNAMIC */
+                  }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["onClick"]))
+                }), 128 /* KEYED_FRAGMENT */))
+              ]),
+              _: 1 /* STABLE */
+            }))
+          : createCommentVNode("v-if", true)
+      ]),
+      _: 1 /* STABLE */
+    })
+  ]))
+});
+
+var css_248z$1 = ".status-select[data-v-09353107] {\n  position: relative;\n  margin-left: 7px;\n}\n.status-select .v-list[data-v-09353107] {\n  position: absolute;\n  background-color: var(--background-normal);\n  width: 175px !important;\n  min-width: 175px !important;\n  padding: 3px 5px;\n}\n.status-select .v-list .v-list-item[data-v-09353107] {\n  cursor: pointer;\n}\n.status-select .v-list .v-list-item[data-v-09353107]:hover {\n  background-color: var(--background-normal-alt);\n}";
 styleInject(css_248z$1);
 
 script$1.render = render$1;
-script$1.__scopeId = "data-v-6013fdea";
-script$1.__file = "src/SelectionDialog.vue";
+script$1.__scopeId = "data-v-09353107";
+script$1.__file = "src/StatusSelect.vue";
 
 var script = {
     emits: ["input"],
-    components: { SelectionDialog: script$1 },
+    components: { SelectionDialog: script$2, StatusSelect: script$1 },
     props: {
         value: {
             type: Array,
             required: true,
             default: null,
+        },
+        primaryKey: {
+            type: String,
         },
     },
     setup: function (props, _a) {
@@ -330,6 +489,7 @@ var script = {
         var dialogOpen = ref(false);
         var singlePropositionsIDs = ref([]);
         var invalidPropositions = ref([]);
+        var update = ref(false);
         var selectionOptions = ref([]);
         watch(values, function (currentValues) { return __awaiter(_this, void 0, void 0, function () {
             var _a, conflictIDs, responseData, avaiablePropositions, _b, _c, _d, _e, _f, e_1;
@@ -401,12 +561,17 @@ var script = {
         var handleInput = function (propositions) {
             emit("input", __spreadArray(__spreadArray([], props.value), propositions));
         };
+        var forceUpdate = function () {
+            update.value = !update.value;
+        };
         return {
             handleInput: handleInput,
             dialogOpen: dialogOpen,
             selectionOptions: selectionOptions,
             loading: loading,
             invalidPropositions: invalidPropositions,
+            update: update,
+            forceUpdate: forceUpdate,
         };
     },
 };
@@ -417,12 +582,14 @@ const _hoisted_2 = {
   class: "errors"
 };
 const _hoisted_3 = /*#__PURE__*/createVNode("p", null, " As seguintes proposições não podem aparecer na votação por item e bloco ao mesmo tempo: ", -1 /* HOISTED */);
-const _hoisted_4 = /*#__PURE__*/createTextVNode(" Adicionar existente ");
+const _hoisted_4 = { class: "action-buttons" };
+const _hoisted_5 = /*#__PURE__*/createTextVNode(" Adicionar existente ");
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_render_template = resolveComponent("render-template");
   const _component_interface_list_m2m = resolveComponent("interface-list-m2m");
   const _component_v_button = resolveComponent("v-button");
+  const _component_status_select = resolveComponent("status-select");
   const _component_selection_dialog = resolveComponent("selection-dialog");
 
   return (openBlock(), createBlock("div", _hoisted_1, [
@@ -440,6 +607,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         ]))
       : createCommentVNode("v-if", true),
     createVNode(_component_interface_list_m2m, {
+      key: $setup.update,
       collection: "ordem_do_dia",
       field: "proposicao_bloco",
       enableSelect: false,
@@ -447,26 +615,33 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       onInput: _cache[1] || (_cache[1] = $event => (_ctx.$emit('input', $event))),
       template: `{{proposicoes_id.status}} - {{proposicoes_id.titulo}} - {{proposicoes_id.numero}} - {{proposicoes_id.tipo}}`
     }, null, 8 /* PROPS */, ["value", "template"]),
-    createVNode(_component_v_button, {
-      class: "selection-button",
-      onClick: _cache[2] || (_cache[2] = $event => ($setup.dialogOpen = true)),
-      disabled: $setup.loading
-    }, {
-      default: withCtx(() => [
-        _hoisted_4
-      ]),
-      _: 1 /* STABLE */
-    }, 8 /* PROPS */, ["disabled"]),
+    createVNode("div", _hoisted_4, [
+      createVNode(_component_v_button, {
+        onClick: _cache[2] || (_cache[2] = $event => ($setup.dialogOpen = true)),
+        disabled: $setup.loading
+      }, {
+        default: withCtx(() => [
+          _hoisted_5
+        ]),
+        _: 1 /* STABLE */
+      }, 8 /* PROPS */, ["disabled"]),
+      createVNode(_component_status_select, {
+        propositions: $props.value,
+        primaryKey: $props.primaryKey,
+        disabled: $setup.loading || $setup.invalidPropositions.length > 0,
+        onUpdate: _cache[3] || (_cache[3] = $event => ($setup.forceUpdate()))
+      }, null, 8 /* PROPS */, ["propositions", "primaryKey", "disabled"])
+    ]),
     createVNode(_component_selection_dialog, {
       open: $setup.dialogOpen,
       options: $setup.selectionOptions,
-      onInput: _cache[3] || (_cache[3] = $event => ($setup.handleInput($event))),
-      onClose: _cache[4] || (_cache[4] = $event => ($setup.dialogOpen = false))
+      onInput: _cache[4] || (_cache[4] = $event => ($setup.handleInput($event))),
+      onClose: _cache[5] || (_cache[5] = $event => ($setup.dialogOpen = false))
     }, null, 8 /* PROPS */, ["open", "options"])
   ]))
 }
 
-var css_248z = ".block-voting .selection-button {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n}\n.block-voting .errors {\n  margin-bottom: 35px;\n}\n.block-voting .errors p {\n  color: var(--warning);\n}\n.block-voting .errors .render-template {\n  margin: 3px 0px;\n}";
+var css_248z = ".block-voting .action-buttons {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n  display: flex;\n  flex-direction: row;\n}\n.block-voting .errors {\n  margin-bottom: 35px;\n}\n.block-voting .errors p {\n  color: var(--warning);\n}\n.block-voting .errors .render-template {\n  margin: 3px 0px;\n}";
 styleInject(css_248z);
 
 script.render = render;
