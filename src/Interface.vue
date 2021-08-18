@@ -182,6 +182,7 @@ export default {
         transform: translateY(-44px) translateX(147px);
         display: flex;
         flex-direction: row;
+        z-index: 9;
     }
 
     .errors {

@@ -653,7 +653,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ]))
 }
 
-var css_248z = ".block-voting .action-buttons {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n  display: flex;\n  flex-direction: row;\n}\n.block-voting .errors {\n  margin-bottom: 35px;\n}\n.block-voting .errors p {\n  color: var(--warning);\n}\n.block-voting .errors .render-template {\n  margin: 3px 0px;\n}";
+var css_248z = ".block-voting .action-buttons {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n  display: flex;\n  flex-direction: row;\n  z-index: 9;\n}\n.block-voting .errors {\n  margin-bottom: 35px;\n}\n.block-voting .errors p {\n  color: var(--warning);\n}\n.block-voting .errors .render-template {\n  margin: 3px 0px;\n}";
 styleInject(css_248z);
 
 script.render = render;
