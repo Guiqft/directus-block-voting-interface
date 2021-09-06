@@ -6,9 +6,9 @@ const checkForPropositionsObjects = (proposicoes: any[]) => {
     return proposicoes.find((el) => typeof el === "object")
 }
 
-const getSinglePropositionsIDs = async (idList: number[], system: any) => {
+const getSinglePropositionsIDs = async (idList: number[], api: any) => {
     const responseData = (
-        await system.api.get("items/ordem_do_dia_proposicoes", {
+        await api.get("items/ordem_do_dia_proposicoes", {
             params: {
                 filter: {
                     id: {
@@ -28,7 +28,7 @@ const removeArrayDuplicates = (arr: string[]) => {
     })
 }
 
-export const getItemByItemIDs = async (propositions: any, system: any) => {
+export const getItemByItemIDs = async (propositions: any, api: any) => {
     const idList = []
     // If exists single propositions on item by item field
     // When m2m fields already has setted values, they came as single ID's for each field relation.
@@ -38,7 +38,7 @@ export const getItemByItemIDs = async (propositions: any, system: any) => {
         idList.push(
             ...(await getSinglePropositionsIDs(
                 propositions.filter((el: any) => typeof el === "number"),
-                system
+                api
             ))
         )
 
@@ -85,7 +85,7 @@ export const getSelectOptions = (validPropositions: any[]) => {
 
 export const conflictPropositions = async (
     values: Record<string, any>,
-    system: any
+    api: any
 ) => {
     const newPropositionsItemByItemIDs = values.proposicao
         .filter((el: any) => typeof el === "object")
@@ -93,7 +93,7 @@ export const conflictPropositions = async (
 
     const blockPropositionsIDs = await getBlockPropositionsIDs(
         values.proposicao_bloco,
-        system
+        api
     )
     // if intersection length > 0, has conflicts between block and item by item
     return arrayIntersection(newPropositionsItemByItemIDs, blockPropositionsIDs)
@@ -105,13 +105,13 @@ const arrayIntersection = (array1: any[], array2: any[]) => {
 
 export const getBlockPropositionsIDs = async (
     propositions: any[],
-    system: any
+    api: any
 ) => {
     let blockPropositionsIDs = [] as any[]
     if (propositions) {
         if (checkForRelationIds(propositions)) {
             const responseData = (
-                await system.api.get("items/ordem_do_dia_proposicoes_1", {
+                await api.get("items/ordem_do_dia_proposicoes_1", {
                     params: {
                         filter: {
                             id: {

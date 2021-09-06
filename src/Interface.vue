@@ -74,7 +74,7 @@ export default {
         },
     },
     setup(props, { emit }) {
-        const system = inject("system") as Record<string, any>
+        const api = inject("api") as Record<string, any>
         const values = inject("values") as Record<string, any>
 
         const loading = ref(false)
@@ -94,17 +94,17 @@ export default {
                         // getting propositions item by item
                         singlePropositionsIDs.value = await getItemByItemIDs(
                             currentValues.proposicao,
-                            system
+                            api
                         )
 
                         const conflictIDs = await conflictPropositions(
                             currentValues,
-                            system
+                            api
                         )
 
                         if (conflictIDs.length > 0) {
                             const responseData = (
-                                await system.api.get("items/proposicoes", {
+                                await api.get("items/proposicoes", {
                                     params: {
                                         filter: {
                                             id: {
@@ -130,13 +130,13 @@ export default {
                     }
 
                     const avaiablePropositions = (
-                        await system.api.get("items/proposicoes", {
+                        await api.get("items/proposicoes", {
                             params: {
                                 filter: getFilters([
                                     ...singlePropositionsIDs.value,
                                     ...(await getBlockPropositionsIDs(
                                         currentValues.proposicao_bloco,
-                                        system
+                                        api
                                     )),
                                 ]),
                             },
@@ -182,7 +182,7 @@ export default {
         transform: translateY(-44px) translateX(147px);
         display: flex;
         flex-direction: row;
-        z-index: 9;
+        z-index: 4;
     }
 
     .errors {

@@ -69,11 +69,11 @@ var checkForRelationIds = function (proposicoes) {
 var checkForPropositionsObjects = function (proposicoes) {
     return proposicoes.find(function (el) { return typeof el === "object"; });
 };
-var getSinglePropositionsIDs = function (idList, system) { return __awaiter(void 0, void 0, void 0, function () {
+var getSinglePropositionsIDs = function (idList, api) { return __awaiter(void 0, void 0, void 0, function () {
     var responseData;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4, system.api.get("items/ordem_do_dia_proposicoes", {
+            case 0: return [4, api.get("items/ordem_do_dia_proposicoes", {
                     params: {
                         filter: {
                             id: {
@@ -93,7 +93,7 @@ var removeArrayDuplicates = function (arr) {
         return array.indexOf(value) === index;
     });
 };
-var getItemByItemIDs = function (propositions, system) { return __awaiter(void 0, void 0, void 0, function () {
+var getItemByItemIDs = function (propositions, api) { return __awaiter(void 0, void 0, void 0, function () {
     var idList, _a, _b, _c;
     return __generator(this, function (_d) {
         switch (_d.label) {
@@ -102,7 +102,7 @@ var getItemByItemIDs = function (propositions, system) { return __awaiter(void 0
                 if (!checkForRelationIds(propositions)) return [3, 2];
                 _b = (_a = idList.push).apply;
                 _c = [idList];
-                return [4, getSinglePropositionsIDs(propositions.filter(function (el) { return typeof el === "number"; }), system)];
+                return [4, getSinglePropositionsIDs(propositions.filter(function (el) { return typeof el === "number"; }), api)];
             case 1:
                 _b.apply(_a, _c.concat([(_d.sent())]));
                 _d.label = 2;
@@ -141,7 +141,7 @@ var getSelectOptions = function (validPropositions) {
         value: { proposicoes_id: el.id },
     }); });
 };
-var conflictPropositions = function (values, system) { return __awaiter(void 0, void 0, void 0, function () {
+var conflictPropositions = function (values, api) { return __awaiter(void 0, void 0, void 0, function () {
     var newPropositionsItemByItemIDs, blockPropositionsIDs;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -149,7 +149,7 @@ var conflictPropositions = function (values, system) { return __awaiter(void 0, 
                 newPropositionsItemByItemIDs = values.proposicao
                     .filter(function (el) { return typeof el === "object"; })
                     .map(function (el) { return el.proposicoes_id; });
-                return [4, getBlockPropositionsIDs(values.proposicao_bloco, system)];
+                return [4, getBlockPropositionsIDs(values.proposicao_bloco, api)];
             case 1:
                 blockPropositionsIDs = _a.sent();
                 return [2, arrayIntersection(newPropositionsItemByItemIDs, blockPropositionsIDs)];
@@ -159,7 +159,7 @@ var conflictPropositions = function (values, system) { return __awaiter(void 0, 
 var arrayIntersection = function (array1, array2) {
     return array1.filter(function (value) { return array2.includes(value); });
 };
-var getBlockPropositionsIDs = function (propositions, system) { return __awaiter(void 0, void 0, void 0, function () {
+var getBlockPropositionsIDs = function (propositions, api) { return __awaiter(void 0, void 0, void 0, function () {
     var blockPropositionsIDs, responseData;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -167,7 +167,7 @@ var getBlockPropositionsIDs = function (propositions, system) { return __awaiter
                 blockPropositionsIDs = [];
                 if (!propositions) return [3, 3];
                 if (!checkForRelationIds(propositions)) return [3, 2];
-                return [4, system.api.get("items/ordem_do_dia_proposicoes_1", {
+                return [4, api.get("items/ordem_do_dia_proposicoes_1", {
                         params: {
                             filter: {
                                 id: {
@@ -337,7 +337,7 @@ var script$1 = {
     setup: function (props, _a) {
         var _this = this;
         var emit = _a.emit;
-        var system = inject("system");
+        var api = inject("api");
         var isOpen = ref(false);
         var loading = ref(false);
         var toggleOpen = function () {
@@ -375,7 +375,7 @@ var script$1 = {
                             .filter(function (el) { return typeof el === "object"; })
                             .map(function (el) { return el.proposicoes_id; });
                         relationIDs = props.propositions.filter(function (el) { return typeof el === "number"; });
-                        return [4, system.api.get("items/ordem_do_dia_proposicoes_1", {
+                        return [4, api.get("items/ordem_do_dia_proposicoes_1", {
                                 params: { filter: { id: { _in: relationIDs } } },
                             })];
                     case 1:
@@ -383,7 +383,7 @@ var script$1 = {
                         relationsData.map(function (proposition) {
                             return propositionsIDs.push(proposition.proposicoes_id);
                         });
-                        return [4, system.api.patch("items/proposicoes", {
+                        return [4, api.patch("items/proposicoes", {
                                 keys: propositionsIDs,
                                 data: { status: newStatus },
                             })];
@@ -495,7 +495,7 @@ var script = {
     setup: function (props, _a) {
         var _this = this;
         var emit = _a.emit;
-        var system = inject("system");
+        var api = inject("api");
         var values = inject("values");
         var loading = ref(false);
         var dialogOpen = ref(false);
@@ -515,14 +515,14 @@ var script = {
                         _j.trys.push([1, 9, , 10]);
                         if (!currentValues.proposicao) return [3, 6];
                         _a = singlePropositionsIDs;
-                        return [4, getItemByItemIDs(currentValues.proposicao, system)];
+                        return [4, getItemByItemIDs(currentValues.proposicao, api)];
                     case 2:
                         _a.value = _j.sent();
-                        return [4, conflictPropositions(currentValues, system)];
+                        return [4, conflictPropositions(currentValues, api)];
                     case 3:
                         conflictIDs = _j.sent();
                         if (!(conflictIDs.length > 0)) return [3, 5];
-                        return [4, system.api.get("items/proposicoes", {
+                        return [4, api.get("items/proposicoes", {
                                 params: {
                                     filter: {
                                         id: {
@@ -545,13 +545,13 @@ var script = {
                         invalidPropositions.value = [];
                         _j.label = 6;
                     case 6:
-                        _c = (_b = system.api).get;
+                        _c = (_b = api).get;
                         _d = ["items/proposicoes"];
                         _g = {};
                         _h = {};
                         _e = getFilters;
                         _f = [__spreadArray([], singlePropositionsIDs.value)];
-                        return [4, getBlockPropositionsIDs(currentValues.proposicao_bloco, system)];
+                        return [4, getBlockPropositionsIDs(currentValues.proposicao_bloco, api)];
                     case 7: return [4, _c.apply(_b, _d.concat([(_g.params = (_h.filter = _e.apply(void 0, [__spreadArray.apply(void 0, _f.concat([(_j.sent())]))]),
                                 _h),
                                 _g)]))];
@@ -653,7 +653,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ]))
 }
 
-var css_248z = ".block-voting .action-buttons {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n  display: flex;\n  flex-direction: row;\n  z-index: 9;\n}\n.block-voting .errors {\n  margin-bottom: 35px;\n}\n.block-voting .errors p {\n  color: var(--warning);\n}\n.block-voting .errors .render-template {\n  margin: 3px 0px;\n}";
+var css_248z = ".block-voting .action-buttons {\n  position: absolute;\n  transform: translateY(-44px) translateX(147px);\n  display: flex;\n  flex-direction: row;\n  z-index: 4;\n}\n.block-voting .errors {\n  margin-bottom: 35px;\n}\n.block-voting .errors p {\n  color: var(--warning);\n}\n.block-voting .errors .render-template {\n  margin: 3px 0px;\n}";
 styleInject(css_248z);
 
 script.render = render;

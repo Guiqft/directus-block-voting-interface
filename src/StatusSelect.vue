@@ -46,7 +46,7 @@ export default {
         },
     },
     setup(props, { emit }) {
-        const system = inject("system") as Record<string, any>
+        const api = inject("api") as Record<string, any>
 
         const isOpen = ref(false)
         const loading = ref(false)
@@ -90,7 +90,7 @@ export default {
             )
 
             const relationsData = (
-                await system.api.get("items/ordem_do_dia_proposicoes_1", {
+                await api.get("items/ordem_do_dia_proposicoes_1", {
                     params: { filter: { id: { _in: relationIDs } } },
                 })
             ).data.data
@@ -98,7 +98,7 @@ export default {
                 propositionsIDs.push(proposition.proposicoes_id)
             )
 
-            await system.api.patch("items/proposicoes", {
+            await api.patch("items/proposicoes", {
                 keys: propositionsIDs,
                 data: { status: newStatus },
             })
